@@ -1,0 +1,6 @@
+{
+  "name": "Cookie Clicker Mobile",
+  "description": "Um jogo de cookie clicker complexo e altamente viciante otimizado para celular, com múltiplos upgrades, estruturas automáticas, conquistas, cookies dourados aleatórios e sistema de prestígio.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
