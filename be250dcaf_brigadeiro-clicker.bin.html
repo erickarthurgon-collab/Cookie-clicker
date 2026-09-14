@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Brigadeiro Clicker — Confeitaria Infinita</title>
+<meta name="description" content="Jogo clicker de brigadeiro: construa sua confeitaria, colete brigadeiros dourados, desbloqueie papéis de parede de cozinha e renasça no Legado!"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Nunito',system-ui,sans-serif;color:#4a2f17;background-color:#fdf3e0;background-image:repeating-linear-gradient(90deg,#fdf3e0 0 34px,#f9ead0 34px 68px);background-attachment:fixed;min-height:100vh;-webkit-tap-highlight-color:transparent}
+button{font-family:'Nunito',sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:14px 14px 40px}
+header{display:flex;align-items:center;justify-content:space-between;padding:8px 4px 12px}
+h1{font:800 27px/1 'Baloo 2',cursive;margin:0;letter-spacing:.3px;display:flex;align-items:center;gap:10px}
+h1 .dots{display:inline-flex;gap:4px}
+h1 .dots i{width:7px;height:7px;border-radius:50%;display:inline-block}
+h1 small{display:block;font:700 12px 'Nunito';color:#a08060;margin-top:2px;letter-spacing:1px}
+.sndbtn{border:2px solid #efdcc0;background:#fffdf6;border-radius:12px;padding:8px 12px;font:800 12px 'Nunito';color:#8a5a2b;cursor:pointer}
+.cols{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:860px){.cols{grid-template-columns:1fr 1.15fr;align-items:start}.leftcol{position:sticky;top:12px}}
+.card{background:#fffdf6;border:2px solid #efdcc0;border-radius:18px;box-shadow:0 4px 16px rgba(90,60,30,.09)}
+.counter{padding:14px;text-align:center;margin-bottom:14px}
+.clabel{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#a08060;font-weight:800}
+.cnum{font:800 40px/1.1 'Baloo 2';color:#5a3620}
+.csub{font-size:13px;color:#a08060;margin-top:4px;font-weight:700}
+.buffchip{display:inline-block;margin-top:8px;background:#fff3cf;border:2px solid #e6b422;color:#8a6410;border-radius:999px;padding:4px 14px;font:800 13px 'Baloo 2'}
+.cz{position:relative;padding:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;overflow:hidden;margin-bottom:14px;min-height:270px}
+.cz svg.brio{transition:transform .1s}
+.bob{animation:bob 3.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.squash{animation:squash .18s ease-out}
+@keyframes squash{0%{transform:scale(1)}40%{transform:scale(.93,1.05)}100%{transform:scale(1)}}
+.hint{position:absolute;bottom:10px;left:0;right:0;text-align:center;font:800 13px 'Baloo 2';color:#b5793a;animation:bob 1.6s ease-in-out infinite}
+.fl{position:absolute;font:800 15px 'Baloo 2';color:#6b4226;pointer-events:none;animation:flUp 1s ease-out forwards;text-shadow:0 1px 0 #fff;z-index:6}
+.fl.gold{color:#b07f14;font-size:18px}
+@keyframes flUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
+.spark{position:absolute;width:7px;height:7px;border-radius:50%;pointer-events:none;animation:spark .65s ease-out forwards;z-index:5}
+@keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
+.goldb{position:absolute;z-index:8;cursor:pointer;animation:gpop .35s ease-out;filter:drop-shadow(0 0 10px rgba(230,180,34,.8))}
+.goldb:hover{transform:scale(1.12)}
+@keyframes gpop{from{transform:scale(0)}to{transform:scale(1)}}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.tile{background:#fbf3df;border:2px solid #efdcc0;border-radius:14px;padding:8px 4px;text-align:center}
+.tlabel{font-size:9px;color:#a08060;text-transform:uppercase;letter-spacing:1px;font-weight:800}
+.tval{font:800 16px 'Baloo 2';color:#5a3620}
+.wpbar{padding:12px}
+.wpbar .tlabel{margin-bottom:8px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.sw{width:52px;height:38px;border-radius:10px;border:2px solid #efdcc0;cursor:pointer;padding:0;position:relative;overflow:hidden;background:#fdf3e0}
+.sw.on{outline:3px solid #d29245;outline-offset:1px}
+.sw.lock{opacity:.45;cursor:default}
+.sw small{position:absolute;bottom:0;left:0;right:0;font-size:8px;font-weight:800;background:rgba(255,255,255,.8);color:#6b4226;text-align:center;line-height:1.4}
+.ad-slot{margin:16px auto;max-width:980px;min-height:80px;display:flex;align-items:center;justify-content:center;border:2px dashed #e3cfa8;border-radius:14px;color:#b39c78;font:700 12px 'Nunito';background:rgba(255,255,255,.45);text-align:center;padding:10px}
+.adslot-card{background:#fffdf6;border:2px solid #efdcc0;border-radius:18px;padding:10px}
+.right{padding:12px}
+.tabrow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.tabbtn{padding:9px 2px;border-radius:12px;font:800 12px 'Nunito';background:transparent;border:2px solid transparent;color:#a08060;cursor:pointer;transition:.15s}
+.tabbtn.on{background:#fff;border-color:#efdcc0;color:#4a2f17;box-shadow:0 3px 8px rgba(90,60,30,.1)}
+.bdg{display:inline-block;background:#d29245;color:#fff;border-radius:999px;font-size:9px;padding:1px 6px;margin-left:4px;vertical-align:top}
+.qtyrow{display:flex;gap:6px;margin-bottom:10px}
+.qtybtn{border:2px solid #efdcc0;background:#fff;border-radius:10px;padding:6px 14px;font:800 12px 'Nunito';color:#a08060;cursor:pointer}
+.qtybtn.on{background:#4a2f17;color:#ffe9c9;border-color:#4a2f17}
+.sect{font:800 14px 'Baloo 2';margin:16px 2px 8px}
+.sect:first-child{margin-top:2px}
+.bld{display:flex;gap:10px;align-items:center;background:#fff;border:2px solid #efdcc0;border-radius:16px;padding:10px;margin-bottom:8px}
+.bico{width:42px;height:42px;border-radius:12px;background:#fbf3df;display:flex;align-items:center;justify-content:center;color:#8a5a2b;flex:none}
+.bmid{flex:1;min-width:0}
+.btitle{font:800 15px 'Baloo 2'}
+.bcount{color:#b5793a}
+.bdesc{font-size:11px;color:#a08060;margin-top:1px}
+.buybtn{flex:none;border:none;border-radius:14px;background:linear-gradient(180deg,#e0a55c,#c07f3e);color:#fff;font:800 12px 'Nunito';padding:10px 12px;cursor:pointer;box-shadow:0 3px 8px rgba(150,90,30,.25);transition:.15s;min-width:112px;line-height:1.5}
+.buybtn:hover:not(:disabled){transform:translateY(-2px)}
+.buybtn:disabled{filter:grayscale(.6);opacity:.6;cursor:default}
+.bbar{height:7px;background:#f1e4c8;border-radius:99px;margin-top:7px;overflow:hidden}
+.bfill{height:100%;background:linear-gradient(90deg,#d29245,#b5793a);border-radius:99px;transition:width .3s}
+.bnext{font-size:10px;color:#a08060;margin-top:4px;font-weight:700}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.chip{position:relative;text-align:left;background:#fff;border:2px solid #efdcc0;border-radius:14px;padding:10px 12px;cursor:pointer;transition:.15s;font-family:'Nunito',sans-serif}
+.chip:hover:not(:disabled):not(.done){border-color:#d29245;transform:translateY(-2px);box-shadow:0 6px 14px rgba(90,60,30,.12)}
+.chip:disabled{cursor:default}
+.chip.lock{opacity:.45}
+.chip.done{opacity:.6;border-color:#a8c98a;background:#f6fbef;cursor:default}
+.chrow{display:flex;justify-content:space-between;gap:6px;align-items:center}
+.chname{font-weight:800;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.chcost{font-weight:800;font-size:12px;color:#b5793a;white-space:nowrap}
+.done .chcost{color:#5e9e3e}
+.chdesc{font-size:11px;color:#a08060;margin-top:3px;line-height:1.35}
+.chreq{font-size:10px;color:#c05c4a;margin-top:3px;font-weight:800}
+.tag{background:#d29245;color:#fff;border-radius:999px;font-size:9px;padding:2px 8px;font-weight:800}
+.flavors{display:flex;gap:6px;margin-top:6px}
+.fnames{font-size:10px;color:#a08060;margin-top:3px}
+.goldchip{border-color:#e6c468;background:#fffaf0}
+.achgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.ach{background:#fff;border:2px solid #efdcc0;border-radius:12px;padding:8px;opacity:.4}
+.ach.got{opacity:1;border-color:#a8c98a;background:#f6fbef}
+.ach b{display:block;font-size:11px;font-family:'Baloo 2'}
+.ach span{font-size:10px;color:#a08060;line-height:1.3;display:block}
+.pbar{height:10px;background:#f1e4c8;border-radius:99px;overflow:hidden;margin:8px 2px 4px}
+.pfill{height:100%;background:linear-gradient(90deg,#a8c98a,#5e9e3e);border-radius:99px;transition:width .3s}
+#sky{position:relative;height:150px;border-radius:16px 16px 0 0;overflow:hidden}
+.tw{animation:tw 2.6s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}
+.shoot{position:absolute;width:70px;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(255,255,255,0),#fff);animation:shootMove 1.15s ease-out forwards;pointer-events:none}
+@keyframes shootMove{0%{opacity:0;transform:translate(0,0) rotate(-35deg)}10%{opacity:1}100%{opacity:0;transform:translate(-170px,119px) rotate(-35deg)}}
+.renbtn{margin-top:12px;border:none;border-radius:14px;background:linear-gradient(180deg,#f0c75e,#d29a2b);color:#4a2f17;font:800 15px 'Baloo 2';padding:12px 26px;cursor:pointer;box-shadow:0 4px 10px rgba(150,100,20,.3);transition:.15s}
+.renbtn:hover:not(:disabled){transform:translateY(-2px)}
+.renbtn:disabled{filter:grayscale(.6);opacity:.6;cursor:default}
+footer{margin-top:22px;text-align:center;font-size:12px;color:#a08060}
+.resetbtn{border:none;background:none;color:#c05c4a;font:800 12px 'Nunito';cursor:pointer;text-decoration:underline;margin-top:6px}
+#toasts{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;align-items:center;z-index:60;pointer-events:none;width:max-content;max-width:92vw}
+.toast{background:#4a2f17;color:#ffe9c9;padding:10px 18px;border-radius:999px;font:700 13px 'Nunito';box-shadow:0 6px 20px rgba(0,0,0,.25);animation:tIn .25s ease-out;text-align:center}
+@keyframes tIn{from{opacity:0;transform:translateY(12px)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Brigadeiro Clicker
+    <span class="dots"><i style="background:#e6b422"></i><i style="background:#d94f4f"></i><i style="background:#4f9d69"></i><i style="background:#7d6bb5"></i></span>
+    <small>confeitaria infinita</small>
+  </h1>
+  <button class="sndbtn" id="sndBtn">som: ligado</button>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ANÚNCIO DO TOPO — Google AdSense
+     Quando o jogo estiver publicado no seu site, apague o texto abaixo
+     e cole aqui o código do bloco de anúncios do seu AdSense, por exemplo:
+
+     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-SEU_ID" crossorigin="anonymous"></script>
+     <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-SEU_ID" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="ad-slot" id="adTop">espaço reservado para anúncio (topo)</div>
+
+<main class="cols">
+  <!-- ════ COLUNA ESQUERDA ════ -->
+  <section class="leftcol">
+    <div class="card counter">
+      <div class="clabel">brigadeiros</div>
+      <div class="cnum" id="cnt">0</div>
+      <div class="csub">por segundo: <b id="bpsTxt">0</b> &nbsp;·&nbsp; por clique: <b id="cpcTxt">1</b></div>
+      <span class="buffchip" id="buffChip" style="display:none"></span>
+    </div>
+
+    <div class="card cz" id="cz">
+      <span id="brioWrap" class="bob"></span>
+      <div class="hint" id="hint">clique no brigadeiro!</div>
+    </div>
+
+    <div class="stats">
+      <div class="tile"><div class="tlabel">por segundo</div><div class="tval" id="tBps">0</div></div>
+      <div class="tile"><div class="tlabel">por clique</div><div class="tval" id="tCpc">1</div></div>
+      <div class="tile"><div class="tlabel">total na vida</div><div class="tval" id="tTotal">0</div></div>
+      <div class="tile"><div class="tlabel">cliques</div><div class="tval" id="tClicks">0</div></div>
+      <div class="tile"><div class="tlabel">dourados</div><div class="tval" id="tGold">0</div></div>
+      <div class="tile"><div class="tlabel">tempo</div><div class="tval" id="tTime">0min</div></div>
+    </div>
+
+    <div class="card wpbar">
+      <div class="tlabel">fundo da cozinha</div>
+      <div class="swatches" id="swList"></div>
+    </div>
+  </section>
+
+  <!-- ════ COLUNA DIREITA ════ -->
+  <section class="card right">
+    <div class="tabrow">
+      <button class="tabbtn on" data-t="0">Construções</button>
+      <button class="tabbtn" data-t="1">Upgrades<span class="bdg" id="upBadge" style="display:none">0</span></button>
+      <button class="tabbtn" data-t="2">Conquistas</button>
+      <button class="tabbtn" data-t="3">Legado<span class="bdg" id="legBadge" style="display:none">0</span></button>
+    </div>
+
+    <div id="tp0">
+      <div class="qtyrow">
+        <button class="qtybtn on" data-q="1">comprar 1×</button>
+        <button class="qtybtn" data-q="10">comprar 10×</button>
+      </div>
+      <div id="bldList"></div>
+    </div>
+
+    <div id="tp1" style="display:none">
+      <h3 class="sect">Brigadeiros Dourados</h3>
+      <div class="chips" id="goldList"></div>
+      <h3 class="sect">Upgrades de Clique</h3>
+      <div class="chips" id="cupList"></div>
+      <h3 class="sect">Upgrades de Construção</h3>
+      <div class="chips" id="upList"></div>
+    </div>
+
+    <div id="tp2" style="display:none">
+      <h3 class="sect">Conquistas</h3>
+      <div class="pbar"><div class="pfill" id="achFill" style="width:0%"></div></div>
+      <div style="font-size:11px;color:#a08060;font-weight:700;margin:0 2px 10px"><span id="achCount">0</span>/50 desbloqueadas</div>
+      <div class="achgrid" id="achList"></div>
+    </div>
+
+    <div id="tp3" style="display:none">
+      <div class="card" style="overflow:hidden;box-shadow:none;margin-bottom:4px">
+        <div id="sky">
+          <svg id="skySvg" viewBox="0 0 400 150" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%"></svg>
+          <div id="celFloat" style="position:absolute;right:18px;top:16px"></div>
+          <div style="position:absolute;left:14px;top:14px"><span style="background:rgba(255,255,255,.9);border-radius:999px;padding:4px 12px;font:800 12px 'Baloo 2';color:#1d2f5e">Céu do Legado</span></div>
+        </div>
+        <div style="padding:16px;text-align:center">
+          <div class="tlabel">pontos de legado</div>
+          <div style="font:800 34px 'Baloo 2';color:#5a3620" id="legPts">0</div>
+          <div style="font-size:12px;color:#a08060">renascimentos: <b id="legRen">0</b> · total assado na vida: <b id="legGrand">0</b></div>
+          <div style="font-size:13px;margin:8px 0 2px">renasça agora para ganhar <b id="legGain" style="color:#b5793a">0</b> ponto(s)</div>
+          <div style="font-size:10px;color:#a08060;line-height:1.5">1 ponto a cada √(total assado na vida ÷ 10 milhões)<br/>renascer reseta as construções e upgrades da rodada, mas guarda conquistas, caixas e celestiais</div>
+          <button class="renbtn" id="renBtn">Renascer</button>
+        </div>
+      </div>
+      <h3 class="sect">Upgrades Celestiais</h3>
+      <div class="chips" id="celList"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ANÚNCIO DO RODAPÉ — Google AdSense
+     Cole aqui o código do seu segundo bloco de anúncios do AdSense.
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="ad-slot" id="adBottom">espaço reservado para anúncio (rodapé)</div>
+
+<footer>
+  feito com carinho · o progresso salva sozinho neste navegador<br/>
+  <button class="resetbtn" id="resetBtn">zerar todo o progresso</button>
+</footer>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+/* ═══════════ DADOS ═══════════ */
+const B=[
+ {n:'Colher de Pau',cost:15,rate:0.1,d:'Mexe a panela sem parar.'},
+ {n:'Fogão',cost:100,rate:1,d:'Fogo baixo, sempre atento.'},
+ {n:'Forma Gourmet',cost:1100,rate:8,d:'Forminhas caprichadas, sem grudar.'},
+ {n:'Confeiteira',cost:12000,rate:47,d:'Mestre(a) das bolinhas.'},
+ {n:'Fábrica',cost:130000,rate:260,d:'Produção em massa.'}];
+const THR=[10,25,50,75,100,125,150,175,200,250];
+const CM=[10,35,120,450,1600,6000,22000,80000,300000,1000000];
+const NAMES=[
+ ['Colher de Silicone','Cabo Antiderrapante','Madeira Nobre','Colher Dupla','Titânio Polido','Feitiço de Creme','Colher do Chef','Herança de Vó','Colher Rara','Colher Lendária'],
+ ['Chama Forte','Queimador Duplo','Panela Grossa','Fogo Alto','Gás Premium','Chama Azul','Fogão Industrial','Fornada Turbo','Chama Eterna','Fogo do Brigadeiro'],
+ ['Forminhas Premium','Papel Manteiga','Travessa Funda','Antiaderente','Bandeja Dupla','Estante de Doces','Alumínio Reforçado','Forma Turbinada','Forma de Titânio','Forma Infinita'],
+ ['Avental Profissional','Treinamento Avançado','Receita da Vovó','Bico de Confeitar','Dupla na Cozinha','Equipe Noturna','Confeiteira-Chefe','Mestra do Brigadeiro','Lenda da Confeitaria','Sonho de Confeitaria'],
+ ['Esteira Automática','Misturador Industrial','Turno Dobrado','Robôs Montadores','Caldeira de Chocolate','Linha de Produção Dupla','Controle de Qualidade','Automação Total','IA Confeiteira','Fábrica dos Sonhos']];
+const CUPS=[
+ {id:'c0',name:'Mão Leve',cost:1000,req:50,desc:'Dobra o poder de clique.'},
+ {id:'c1',name:'Toque de Mestre',cost:10000,req:500,desc:'Dobra o poder de clique.'},
+ {id:'c2',name:'Dedos Mágicos',cost:100000,req:2500,desc:'Cada clique ganha +1% do seu BPS.'},
+ {id:'c3',name:'Punho de Confeiteiro',cost:1000000,req:10000,desc:'Triplica o poder de clique.'},
+ {id:'c4',name:'Bênção do Brigadeiro',cost:10000000,req:50000,desc:'Dobra o clique e cada clique ganha +5% do BPS.'}];
+const GUPS=[
+ {id:'g0',name:'Radar Doce',req:5,desc:'Brigadeiros dourados aparecem 25% mais frequentes.'},
+ {id:'g1',name:'Toque de Midas',req:10,desc:'Bônus instantâneos dourados rendem o dobro.'},
+ {id:'g2',name:'Frenesi Supremo',req:15,desc:'O frenesi dourado rende ×10 (em vez de ×7).'},
+ {id:'g3',name:'Olho de Águia',req:20,desc:'Brigadeiros dourados aparecem mais frequentes ainda.'},
+ {id:'g4',name:'Aura Dourada',req:25,desc:'+10% de produção total, permanente.'}];
+const CELES=[
+ {id:'x0',name:'Alma de Confeiteiro',cost:1,desc:'Obrigatória. Ativa o poder do prestígio: +1% de BPS por ponto de legado guardado. Só depois dela as outras melhorias celestiais ficam disponíveis.'},
+ {id:'x1',name:'Brigadeiros Celestiais',cost:3,desc:'+10% de produção de brigadeiros por segundo, permanente. Eles vão com você em todos os renascimentos.',cel:1},
+ {id:'cx0',name:'Caixa dos Clássicos',cost:20,desc:'+25% de BPS permanente. 5 brigadeiros diferentes moram nesta caixa.',flav:[['Chocolate','#6b4226'],['Branco','#f2e3c8'],['Morango','#d16a86'],['Ninho','#efdcb3'],['Coco','#efe9e0']]},
+ {id:'cx1',name:'Caixa dos Gourmets',cost:20,desc:'+25% de BPS permanente. Sabores sofisticados de confeitaria.',flav:[['Pistache','#9dbb7a'],['Maracujá','#e8b93e'],['Café','#4e342e'],['Churros','#c98a4b'],['Doce de Leite','#b57a45']]},
+ {id:'cx2',name:'Caixa das Frutas',cost:20,desc:'+25% de BPS permanente. Frescor brasileiro em cada bolinha.',flav:[['Limão','#cfd454'],['Uva','#8a6bb5'],['Goiabada','#c9503f'],['Romeu e Julieta','#e8c9a0'],['Açaí','#5a4a8a']]},
+ {id:'cx3',name:'Caixa dos Lendários',cost:20,desc:'+25% de BPS permanente. Os brigadeiros mais raros da confeitaria.',flav:[['Dourado','#e6b422'],['Chocolate Belga','#3f2314'],['Café Especial','#6f4e37'],['Trufado','#8a5a3b'],['Supremo','#b07a52']]}];
+const WPS=[
+ {n:'Creme',css:'repeating-linear-gradient(90deg,#fdf3e0 0 34px,#f9ead0 34px 68px)',req:0,rt:'padrão'},
+ {n:'Azul',css:'repeating-linear-gradient(90deg,#27437a 0 34px,#31589c 34px 68px)',req:1e6,rt:'1 milhão'},
+ {n:'Verde',css:'repeating-linear-gradient(90deg,#2e6b4f 0 34px,#3d8565 34px 68px)',req:1e8,rt:'100 milhões'},
+ {n:'Rosa',css:'repeating-linear-gradient(90deg,#b95c7e 0 34px,#d17ba0 34px 68px)',req:1e10,rt:'10 bilhões'}];
+const SPR=['#e6b422','#d94f4f','#4f9d69','#7d6bb5','#e8845f','#59a7c7'];
+
+/* ═══════════ SVGs ═══════════ */
+function star(x,y,s,c){return '<path d="M'+x+' '+(y-s)+'L'+(x+s*0.28)+' '+(y-s*0.28)+'L'+(x+s)+' '+y+'L'+(x+s*0.28)+' '+(y+s*0.28)+'L'+x+' '+(y+s)+'L'+(x-s*0.28)+' '+(y+s*0.28)+'L'+(x-s)+' '+y+'L'+(x-s*0.28)+' '+(y-s*0.28)+'Z" fill="'+c+'"/>';}
+function sr(x,y,c,rot){return '<rect x="'+x+'" y="'+y+'" width="17" height="6" rx="3" fill="'+c+'" transform="rotate('+rot+' '+(x+8.5)+' '+(y+3)+')"/>';}
+function BRIO(size){return '<svg class="brio" viewBox="0 0 240 240" width="'+size+'" height="'+size+'"><defs><radialGradient id="choc" cx="38%" cy="30%" r="80%"><stop offset="0%" stop-color="#a9744f"/><stop offset="55%" stop-color="#6b4226"/><stop offset="100%" stop-color="#472817"/></radialGradient></defs><ellipse cx="120" cy="222" rx="78" ry="13" fill="#3a2010" opacity=".22"/><circle cx="120" cy="112" r="90" fill="url(#choc)"/><ellipse cx="86" cy="76" rx="28" ry="18" fill="#fff" opacity=".22" transform="rotate(-25 86 76)"/>'+sr(74,150,SPR[0],20)+sr(105,60,SPR[1],-15)+sr(140,145,SPR[2],35)+sr(95,178,SPR[3],-30)+sr(150,95,SPR[4],10)+sr(118,118,SPR[5],-20)+sr(70,105,SPR[1],45)+sr(160,160,SPR[0],-10)+'</svg>';}
+function GOLD(size){return '<svg viewBox="0 0 120 120" width="'+size+'" height="'+size+'"><defs><radialGradient id="goldg" cx="38%" cy="30%" r="80%"><stop offset="0%" stop-color="#ffe9a8"/><stop offset="55%" stop-color="#e6b422"/><stop offset="100%" stop-color="#b07f14"/></radialGradient></defs><circle cx="60" cy="62" r="42" fill="url(#goldg)"/><ellipse cx="46" cy="46" rx="13" ry="8" fill="#fff" opacity=".45" transform="rotate(-25 46 46)"/>'+star(88,84,6,'#fff')+star(36,88,5,'#fff8e0')+star(92,38,4,'#fff')+'</svg>';}
+function CELSVG(size){return '<svg viewBox="0 0 120 120" width="'+size+'" height="'+size+'" style="filter:drop-shadow(0 0 12px rgba(169,192,245,.65))"><defs><radialGradient id="celg" cx="38%" cy="30%" r="80%"><stop offset="0%" stop-color="#eef3ff"/><stop offset="55%" stop-color="#a9c0f5"/><stop offset="100%" stop-color="#6b82c9"/></radialGradient></defs><ellipse cx="60" cy="19" rx="16" ry="5" fill="none" stroke="#ffe9a8" stroke-width="3" opacity=".95"/><circle cx="60" cy="66" r="32" fill="url(#celg)"/><ellipse cx="49" cy="55" rx="11" ry="7" fill="#fff" opacity=".5" transform="rotate(-25 49 55)"/>'+star(55,80,2.5,'#fff')+star(70,74,2,'#ffe9a8')+star(62,90,1.8,'#fff')+star(74,60,1.6,'#ffe9a8')+star(47,72,1.5,'#fff')+'</svg>';}
+function MINI(c,s){return '<svg viewBox="0 0 40 40" width="'+s+'" height="'+s+'"><circle cx="20" cy="20" r="16" fill="'+c+'"/><ellipse cx="13.5" cy="13" rx="5" ry="3.2" fill="#fff" opacity=".35" transform="rotate(-25 13.5 13)"/></svg>';}
+const ICONS=[
+'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="12" cy="6.8" rx="3.6" ry="4.6"/><path d="M12 11.4v10"/></svg>',
+'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4.5 10h15v5.5a4 4 0 0 1-4 4h-7a4 4 0 0 1-4-4V10z"/><path d="M2.5 10h19"/><path d="M8 6.5c0-1.6 1.4-1.6 1.4-3.2M12 6.5c0-1.6 1.4-1.6 1.4-3.2M16 6.5c0-1.6 1.4-1.6 1.4-3.2"/></svg>',
+'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 11.5h13l-1.7 7.6a2 2 0 0 1-2 1.6H9.2a2 2 0 0 1-2-1.6l-1.7-7.6z"/><path d="M5.5 11.5C6.6 8.9 9 7.4 12 7.4s5.4 1.5 6.5 4.1"/><circle cx="9.3" cy="8.6" r="0.6" fill="currentColor"/><circle cx="14.7" cy="8.6" r="0.6" fill="currentColor"/></svg>',
+'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.2 11a4 4 0 0 1 1.4-7.2A5 5 0 0 1 12 2.5a5 5 0 0 1 4.4 1.3A4 4 0 0 1 17.8 11v5.5H6.2V11z"/><path d="M6.2 16.5h11.6"/></svg>',
+'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l5 3v-3l5 3v-3l5 3V6l3 2v13H3z"/><rect x="6.5" y="15.5" width="3" height="3"/><rect x="12.5" y="15.5" width="3" height="3"/></svg>'];
+
+/* ═══════════ ESTADO ═══════════ */
+const DEF={br:0,total:0,grand:0,clicks:0,b:[0,0,0,0,0],up:{},cup:{},gup:{},cel:{},pts:0,claimed:0,renasc:0,goldens:0,play:0,buff:null,snd:true,ach:{},wp:0,flags:{},savedAt:Date.now()};
+let S=JSON.parse(JSON.stringify(DEF));
+try{const d=JSON.parse(localStorage.getItem('brigclicker_v2'));if(d){for(const k in DEF){if(d[k]!==undefined)S[k]=d[k];}}}catch(e){}
+function save(){try{S.savedAt=Date.now();localStorage.setItem('brigclicker_v2',JSON.stringify(S));}catch(e){}}
+
+/* ═══════════ CONQUISTAS ═══════════ */
+const ACH=[
+ {id:'a1',n:'Primeira Colher',d:'Tenha 1 Colher de Pau',c:()=>S.b[0]>=1},
+ {id:'a2',n:'Batedor de Creme',d:'Tenha 10 Colheres de Pau',c:()=>S.b[0]>=10},
+ {id:'a3',n:'Enxame de Colheres',d:'Tenha 50 Colheres de Pau',c:()=>S.b[0]>=50},
+ {id:'a4',n:'Colhericeiro',d:'Tenha 100 Colheres de Pau',c:()=>S.b[0]>=100},
+ {id:'a5',n:'Aceso',d:'Tenha 1 Fogão',c:()=>S.b[1]>=1},
+ {id:'a6',n:'Cozinha Quente',d:'Tenha 10 Fogões',c:()=>S.b[1]>=10},
+ {id:'a7',n:'Panela Cheia',d:'Tenha 50 Fogões',c:()=>S.b[1]>=50},
+ {id:'a8',n:'Chef do Fogo',d:'Tenha 100 Fogões',c:()=>S.b[1]>=100},
+ {id:'a9',n:'Forminha Nova',d:'Tenha 1 Forma Gourmet',c:()=>S.b[2]>=1},
+ {id:'a10',n:'Formas Firmes',d:'Tenha 10 Formas Gourmet',c:()=>S.b[2]>=10},
+ {id:'a11',n:'Formação Completa',d:'Tenha 50 Formas Gourmet',c:()=>S.b[2]>=50},
+ {id:'a12',n:'Forma de Ouro',d:'Tenha 100 Formas Gourmet',c:()=>S.b[2]>=100},
+ {id:'a13',n:'Contratada!',d:'Tenha 1 Confeiteira',c:()=>S.b[3]>=1},
+ {id:'a14',n:'Equipe Doce',d:'Tenha 10 Confeiteiras',c:()=>S.b[3]>=10},
+ {id:'a15',n:'Confeitaria Cheia',d:'Tenha 50 Confeiteiras',c:()=>S.b[3]>=50},
+ {id:'a16',n:'Mestre das Mãos',d:'Tenha 100 Confeiteiras',c:()=>S.b[3]>=100},
+ {id:'a17',n:'Indústria',d:'Tenha 1 Fábrica',c:()=>S.b[4]>=1},
+ {id:'a18',n:'Ligou a Fábrica',d:'Tenha 10 Fábricas',c:()=>S.b[4]>=10},
+ {id:'a19',n:'Produção Total',d:'Tenha 50 Fábricas',c:()=>S.b[4]>=50},
+ {id:'a20',n:'Império do Brigadeiro',d:'Tenha 100 Fábricas',c:()=>S.b[4]>=100},
+ {id:'a21',n:'Dedo Doce',d:'Faça 100 cliques',c:()=>S.clicks>=100},
+ {id:'a22',n:'Mão Rápida',d:'Faça 1.000 cliques',c:()=>S.clicks>=1000},
+ {id:'a23',n:'Dedos de Fogo',d:'Faça 10.000 cliques',c:()=>S.clicks>=10000},
+ {id:'a24',n:'Lenda do Clique',d:'Faça 50.000 cliques',c:()=>S.clicks>=50000},
+ {id:'a25',n:'Primeira Fornada',d:'Asse 1.000 brigadeiros na vida',c:()=>S.grand>=1e3},
+ {id:'a26',n:'Pote Cheio',d:'Asse 100 mil brigadeiros na vida',c:()=>S.grand>=1e5},
+ {id:'a27',n:'Milhão de Brigadeiros',d:'Asse 1 milhão na vida',c:()=>S.grand>=1e6},
+ {id:'a28',n:'Chuva de Chocolate',d:'Asse 100 milhões na vida',c:()=>S.grand>=1e8},
+ {id:'a29',n:'Bilionário do Brigadeiro',d:'Asse 1 bilhão na vida',c:()=>S.grand>=1e9},
+ {id:'a30',n:'Pitada de Velocidade',d:'Chegue a 10 brigadeiros/s',c:()=>bps()>=10},
+ {id:'a31',n:'Fornalha Ativa',d:'Chegue a 100/s',c:()=>bps()>=100},
+ {id:'a32',n:'Rio de Brigadeiro',d:'Chegue a 1.000/s',c:()=>bps()>=1000},
+ {id:'a33',n:'Tsunami Doce',d:'Chegue a 10.000/s',c:()=>bps()>=10000},
+ {id:'a34',n:'Toque de Ouro',d:'Clique em 1 brigadeiro dourado',c:()=>S.goldens>=1},
+ {id:'a35',n:'Caçador Dourado',d:'Clique em 10 dourados',c:()=>S.goldens>=10},
+ {id:'a36',n:'Rei do Ouro',d:'Clique em 50 dourados',c:()=>S.goldens>=50},
+ {id:'a37',n:'Melhorando',d:'Compre 10 upgrades',c:()=>upsCount()>=10},
+ {id:'a38',n:'Aperfeiçoando',d:'Compre 25 upgrades',c:()=>upsCount()>=25},
+ {id:'a39',n:'Colecionador de Upgrades',d:'Compre 50 upgrades',c:()=>upsCount()>=50},
+ {id:'a40',n:'Novo Começo',d:'Renasça 1 vez',c:()=>S.renasc>=1},
+ {id:'a41',n:'Renascido',d:'Renasça 3 vezes',c:()=>S.renasc>=3},
+ {id:'a42',n:'Caixinha Aberta',d:'Compre 1 Caixa de Brigadeiro celestial',c:()=>boxCount()>=1},
+ {id:'a43',n:'Duas Caixas',d:'Compre 2 caixas celestiais',c:()=>boxCount()>=2},
+ {id:'a44',n:'Colecionador de Caixas',d:'Compre as 4 caixas celestiais',c:()=>boxCount()>=4},
+ {id:'a45',n:'Clique Poderoso',d:'Chegue a 50 por clique',c:()=>cpc()>=50},
+ {id:'a46',n:'Mão de Aço',d:'Chegue a 500 por clique',c:()=>cpc()>=500},
+ {id:'a47',n:'Atacareiro',d:'Compre 10 construções de uma vez',c:()=>!!S.flags.bulk},
+ {id:'a48',n:'Decorador de Cozinha',d:'Troque o papel de parede',c:()=>!!S.flags.wp},
+ {id:'a49',n:'Mestre do Toque',d:'Compre os 5 upgrades de clique',c:()=>Object.keys(S.cup).length>=5},
+ {id:'a50',n:'Fornada Eterna',d:'Jogue por 1 hora no total',c:()=>S.play>=3600}];
+
+/* ═══════════ HELPERS ═══════════ */
+const SUF=[[1e15,' qi'],[1e12,' tri'],[1e9,' bi'],[1e6,' mi'],[1e3,' mil']];
+function fmt(n){if(!isFinite(n))return'∞';if(n<0)return'-'+fmt(-n);for(let i=0;i<SUF.length;i++){const v=SUF[i][0],s=SUF[i][1];if(n>=v){const x=n/v;return(x<10?x.toFixed(2):x<100?x.toFixed(1):String(Math.floor(x)))+s;}}if(n<10)return String(Math.floor(n*10)/10);return Math.floor(n).toLocaleString('pt-BR');}
+function ftime(s){s=Math.floor(s);const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);if(h>0)return h+'h '+m+'min';return m+'min';}
+function $(id){return document.getElementById(id);}
+function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;$('toasts').appendChild(d);setTimeout(()=>d.remove(),3200);}
+
+/* ═══════════ SOM ═══════════ */
+let AC=null;
+function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}return AC;}
+function blip(f,v,d){if(!S.snd)return;const a=ac();if(!a)return;try{const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(v,a.currentTime);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+d);o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+d);}catch(e){}}
+function chord(){blip(523,.05,.15);setTimeout(()=>blip(659,.05,.15),90);setTimeout(()=>blip(784,.05,.25),180);}
+
+/* ═══════════ CÁLCULOS ═══════════ */
+function nUp(i){let n=0;for(let j=0;j<10;j++)if(S.up['b'+i+'-'+j])n++;return n;}
+function rateEach(i){return B[i].rate*Math.pow(2,nUp(i));}
+function boxCount(){let n=0;for(let i=0;i<CELES.length;i++)if(CELES[i].id.substring(0,2)==='cx'&&S.cel[CELES[i].id])n++;return n;}
+function prodMult(){let m=1;if(S.cel.x0)m*=1+0.01*S.pts;if(S.cel.x1)m*=1.10;m*=1+0.25*boxCount();if(S.gup.g4)m*=1.1;return m;}
+function frenMult(){return S.gup.g2?10:7;}
+function bps(){let s=0;for(let i=0;i<5;i++)s+=S.b[i]*rateEach(i);let m=prodMult();if(S.buff&&S.buff.until>Date.now())m*=frenMult();return s*m;}
+function cpc(){let p=1;if(S.cup.c0)p*=2;if(S.cup.c1)p*=2;if(S.cup.c3)p*=3;if(S.cup.c4)p*=2;let pct=0;if(S.cup.c2)pct+=0.01;if(S.cup.c4)pct+=0.05;return p+bps()*pct;}
+function upsCount(){return Object.keys(S.up).length+Object.keys(S.cup).length;}
+function costN(i,n){const c=Math.pow(1.15,S.b[i])*B[i].cost;let t=0;for(let k=0;k<n;k++)t+=c*Math.pow(1.15,k);return t;}
+function toClaim(){return Math.max(0,Math.floor(Math.sqrt(S.grand/1e7))-S.claimed);}
+
+/* ═══════════ CONSTRUINDO O DOM ═══════════ */
+$('brioWrap').innerHTML=BRIO(230);
+const brio=$('cz').querySelector('svg.brio');
+let qty=1;
+
+const bldRefs=[];
+for(let i=0;i<5;i++){
+  const d=document.createElement('div');d.className='bld';
+  d.innerHTML='<div class="bico">'+ICONS[i]+'</div><div class="bmid"><div class="btitle">'+B[i].n+' <b class="bcount">0</b></div><div class="bdesc"></div><div class="bbar"><div class="bfill"></div></div><div class="bnext"></div></div><button class="buybtn">Comprar 1×<br/><span class="bcost"></span></button>';
+  $('bldList').appendChild(d);
+  const btn=d.querySelector('.buybtn');
+  btn.addEventListener('click',()=>buyB(i));
+  bldRefs.push({el:d,cnt:d.querySelector('.bcount'),desc:d.querySelector('.bdesc'),fill:d.querySelector('.bfill'),next:d.querySelector('.bnext'),btn:btn,cost:d.querySelector('.bcost')});
+}
+
+const UPS=[];
+for(let i=0;i<5;i++)for(let j=0;j<10;j++)UPS.push({id:'b'+i+'-'+j,kind:'b',b:i,j:j,name:NAMES[i][j],cost:B[i].cost*CM[j],thr:THR[j],desc:'Dobra a produção de '+B[i].n+'.'});
+CUPS.forEach(c=>UPS.push({id:c.id,kind:'c',name:c.name,cost:c.cost,req:c.req,desc:c.desc}));
+const upRefs=[];
+UPS.forEach(cfg=>{
+  const d=document.createElement('button');d.className='chip';
+  d.innerHTML='<div class="chrow"><span class="chname">'+cfg.name+'</span><span class="chcost"></span></div><div class="chdesc">'+cfg.desc+'</div><div class="chreq"></div>';
+  d.addEventListener('click',()=>buyUp(cfg));
+  (cfg.kind==='c'?$('cupList'):$('upList')).appendChild(d);
+  upRefs.push({cfg:cfg,el:d,costEl:d.querySelector('.chcost'),reqEl:d.querySelector('.chreq')});
+});
+
+const goldRefs=[];
+GUPS.forEach(g=>{
+  const d=document.createElement('button');d.className='chip goldchip';d.disabled=true;
+  d.innerHTML='<div class="chrow"><span class="chname">'+g.name+'</span><span class="chcost"></span></div><div class="chdesc">'+g.desc+'</div><div class="chreq"></div>';
+  $('goldList').appendChild(d);
+  goldRefs.push({cfg:g,el:d,costEl:d.querySelector('.chcost'),reqEl:d.querySelector('.chreq')});
+});
+
+const celRefs=[];
+CELES.forEach(c=>{
+  const d=document.createElement('button');d.className='chip';
+  let inner='<div class="chrow"><span class="chname">'+(c.cel?CELSVG(26)+' ':'')+c.name+(c.id==='x0'?' <span class="tag">obrigatória</span>':'')+'</span><span class="chcost"></span></div>';
+  if(c.flav){inner+='<div class="flavors">'+c.flav.map(f=>MINI(f[1],26)).join('')+'</div><div class="fnames">'+c.flav.map(f=>f[0]).join(' · ')+'</div>';}
+  inner+='<div class="chdesc">'+c.desc+'</div><div class="chreq"></div>';
+  d.innerHTML=inner;
+  d.addEventListener('click',()=>buyCel(c));
+  $('celList').appendChild(d);
+  celRefs.push({cfg:c,el:d,costEl:d.querySelector('.chcost'),reqEl:d.querySelector('.chreq')});
+});
+
+const achRefs=[];
+ACH.forEach(a=>{
+  const d=document.createElement('div');d.className='ach';d.title=a.d;
+  d.innerHTML='<b>'+a.n+'</b><span>'+a.d+'</span>';
+  $('achList').appendChild(d);
+  achRefs.push({cfg:a,el:d});
+});
+
+const swRefs=[];
+WPS.forEach((w,i)=>{
+  const d=document.createElement('button');d.className='sw';d.style.backgroundImage=w.css;d.title=w.n;
+  d.innerHTML='<small>'+w.n+'</small>';
+  d.addEventListener('click',()=>{
+    if(!wpUnlocked(i))return;
+    if(S.wp!==i){S.wp=i;S.flags.wp=1;applyWP();save();toast('Fundo da cozinha: '+w.n);blip(600,.05,.1);}
+  });
+  $('swList').appendChild(d);
+  swRefs.push(d);
+});
+function wpUnlocked(i){return i===0||S.grand>=WPS[i].req;}
+function applyWP(){document.body.style.backgroundImage=WPS[S.wp].css;swRefs.forEach((d,i)=>{d.classList.toggle('on',S.wp===i);d.classList.toggle('lock',!wpUnlocked(i));});}
+
+/* ═══════════ CÉU ESTRELADO ═══════════ */
+(function buildSky(){
+  let h='<defs><linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c1230"/><stop offset="1" stop-color="#1d2f5e"/></linearGradient></defs><rect width="400" height="150" fill="url(#skyg)"/>';
+  for(let i=0;i<48;i++){
+    const x=4+Math.random()*392,y=4+Math.random()*142,r=0.5+Math.random()*1.1,du=(1.4+Math.random()*2.2).toFixed(2),de=(Math.random()*3).toFixed(2);
+    h+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(2)+'" fill="#dfe9ff" class="tw" style="animation-duration:'+du+'s;animation-delay:'+de+'s"/>';
+  }
+  h+=star(340,28,4,'#fff')+star(70,110,3,'#cfe0ff')+star(215,44,3,'#ffe9a8');
+  $('skySvg').innerHTML=h;
+  $('celFloat').innerHTML='<span class="bob">'+CELSVG(84)+'</span>';
+  function shoot(){
+    const s=document.createElement('span');s.className='shoot';
+    s.style.left=(45+Math.random()*50)+'%';s.style.top=(5+Math.random()*50)+'%';
+    $('sky').appendChild(s);setTimeout(()=>s.remove(),1300);
+  }
+  setTimeout(shoot,1500);setInterval(shoot,5200);
+})();
+
+/* ═══════════ AÇÕES ═══════════ */
+function buyB(i){const c=costN(i,qty);if(S.br<c)return;S.br-=c;S.b[i]+=qty;if(qty>=10)S.flags.bulk=1;blip(660,.05,.08);save();}
+function buyUp(cfg){
+  const bought=cfg.kind==='b'?S.up[cfg.id]:S.cup[cfg.id];
+  const un=cfg.kind==='b'?S.b[cfg.b]>=cfg.thr:S.clicks>=cfg.req;
+  if(bought||!un||S.br<cfg.cost)return;
+  S.br-=cfg.cost;if(cfg.kind==='b')S.up[cfg.id]=1;else S.cup[cfg.id]=1;
+  toast('Upgrade: '+cfg.name);chord();save();
+}
+function buyCel(c){
+  if(S.cel[c.id])return;
+  if(c.id!=='x0'&&!S.cel.x0)return;
+  if(S.pts<c.cost)return;
+  S.pts-=c.cost;S.cel[c.id]=1;
+  toast('Celestial: '+c.name);chord();save();
+}
+let renArm=false,renTO=null;
+$('renBtn').addEventListener('click',()=>{
+  const c=toClaim();if(c<1)return;
+  if(!renArm){renArm=true;$('renBtn').textContent='clique de novo para CONFIRMAR';renTO=setTimeout(()=>{renArm=false;$('renBtn').textContent='Renascer';},4000);return;}
+  clearTimeout(renTO);renArm=false;$('renBtn').textContent='Renascer';
+  S.pts+=c;S.claimed+=c;S.renasc++;
+  S.br=0;S.total=0;S.b=[0,0,0,0,0];S.up={};S.cup={};S.buff=null;
+  toast('Renascimento! +'+c+' ponto(s) de legado');chord();save();
+});
+
+$('cz').addEventListener('click',function(e){
+  const p=cpc();S.br+=p;S.total+=p;S.grand+=p;S.clicks++;
+  blip(280+Math.random()*90,.05,.07);
+  brio.classList.remove('squash');void brio.offsetWidth;brio.classList.add('squash');
+  const r=$('cz').getBoundingClientRect(),x=e.clientX-r.left-10,y=e.clientY-r.top-10;
+  fl(x,y,'+'+fmt(p),'');
+  for(let k=0;k<5;k++){
+    const s=document.createElement('span');s.className='spark';
+    s.style.left=x+'px';s.style.top=y+'px';s.style.background=SPR[k%SPR.length];
+    s.style.setProperty('--dx',(Math.random()*120-60).toFixed(0)+'px');
+    s.style.setProperty('--dy',(-15-Math.random()*90).toFixed(0)+'px');
+    $('cz').appendChild(s);setTimeout(()=>s.remove(),700);
+  }
+  if(S.clicks>5)$('hint').style.display='none';
+});
+function fl(x,y,txt,cls){const s=document.createElement('span');s.className='fl '+cls;s.textContent=txt;s.style.left=x+'px';s.style.top=y+'px';$('cz').appendChild(s);setTimeout(()=>s.remove(),1000);}
+
+/* dourado */
+let gEl=null,gNext=Date.now()+gDelay();
+function gDelay(){let f=75000;if(S.gup.g0)f*=0.75;if(S.gup.g3)f*=0.75;return f*(0.5+Math.random());}
+function spawnGold(){
+  if(gEl)return;
+  gEl=document.createElement('div');gEl.className='goldb';gEl.innerHTML=GOLD(62);
+  const w=Math.max(1,$('cz').clientWidth-90),h=Math.max(1,$('cz').clientHeight-90);
+  gEl.style.left=(20+Math.random()*w)+'px';gEl.style.top=(20+Math.random()*h)+'px';
+  $('cz').appendChild(gEl);
+  const t=setTimeout(()=>{if(gEl){gEl.remove();gEl=null;}},10000);
+  gEl.addEventListener('click',function(e){
+    e.stopPropagation();e.preventDefault();clearTimeout(t);
+    const rect=$('cz').getBoundingClientRect();
+    if(Math.random()<0.5){
+      let g=Math.min(S.br*0.15,bps()*900)+13;if(S.gup.g1)g*=2;
+      S.br+=g;S.total+=g;S.grand+=g;S.goldens++;
+      toast('Bônus dourado! +'+fmt(g)+' brigadeiros');
+      fl(e.clientX-rect.left-20,e.clientY-rect.top-20,'+'+fmt(g),'gold');
+    }else{
+      S.goldens++;S.buff={until:Date.now()+30000};
+      toast('FRENESI! Produção ×'+frenMult()+' por 30s');
+    }
+    gEl.remove();gEl=null;gNext=Date.now()+gDelay();
+    blip(880,.07,.3);save();
+  });
+}
+
+/* tabs, quantidade, som, reset */
+document.querySelectorAll('.tabbtn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabbtn').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  for(let i=0;i<4;i++)$('tp'+i).style.display=(String(i)===b.dataset.t?'':'none');
+  blip(500,.03,.06);
+}));
+document.querySelectorAll('.qtybtn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.qtybtn').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');qty=parseInt(b.dataset.q,10);blip(500,.03,.06);
+}));
+$('sndBtn').addEventListener('click',()=>{S.snd=!S.snd;$('sndBtn').textContent='som: '+(S.snd?'ligado':'mudo');save();});
+let rstArm=false,rstTO=null;
+$('resetBtn').addEventListener('click',()=>{
+  if(!rstArm){rstArm=true;$('resetBtn').textContent='clique de novo para APAGAR TUDO';rstTO=setTimeout(()=>{rstArm=false;$('resetBtn').textContent='zerar todo o progresso';},4000);return;}
+  clearTimeout(rstTO);try{localStorage.removeItem('brigclicker_v2');}catch(e){}location.reload();
+});
+
+/* ═══════════ ATUALIZAÇÃO DA TELA ═══════════ */
+function updBld(r,i){
+  const c=costN(i,qty);
+  r.cnt.textContent=S.b[i];
+  r.desc.textContent=B[i].d+' · '+fmt(rateEach(i)*prodMult())+'/s cada';
+  r.cost.textContent=fmt(c);
+  r.btn.disabled=S.br<c;
+  r.btn.firstChild.nodeValue='Comprar '+qty+'×';
+  let nj=-1;for(let j=0;j<10;j++){if(!S.up['b'+i+'-'+j]){nj=j;break;}}
+  if(nj<0){r.fill.style.width='100%';r.next.textContent='upgrades completos ✓';}
+  else{const w=Math.min(100,S.b[i]/THR[nj]*100);r.fill.style.width=w+'%';r.next.textContent='próx. upgrade em '+THR[nj]+'× '+B[i].n+' ('+S.b[i]+'/'+THR[nj]+')';}
+}
+function updChip(r){
+  const c=r.cfg;
+  const bought=c.kind==='b'?S.up[c.id]:S.cup[c.id];
+  const un=c.kind==='b'?S.b[c.b]>=c.thr:S.clicks>=c.req;
+  if(bought){r.el.classList.add('done');r.el.classList.remove('lock');r.el.disabled=true;r.costEl.textContent='✓';r.reqEl.textContent='';return;}
+  r.el.classList.remove('done');
+  r.costEl.textContent=fmt(c.cost);
+  if(!un){r.el.classList.add('lock');r.el.disabled=true;r.reqEl.textContent=c.kind==='b'?('requer '+c.thr+'× '+B[c.b].n):('requer '+c.req.toLocaleString('pt-BR')+' cliques');}
+  else{r.el.classList.remove('lock');r.el.disabled=S.br<c.cost;r.reqEl.textContent='';}
+}
+function updGold(r){
+  const g=r.cfg;
+  if(S.gup[g.id]){r.el.classList.add('done');r.el.classList.remove('lock');r.costEl.textContent='✓';r.reqEl.textContent='conquistado';return;}
+  r.el.classList.remove('done');r.costEl.textContent='grátis';
+  r.reqEl.textContent='libera com '+g.req+' brigadeiros dourados';
+  r.el.classList.toggle('lock',S.goldens<g.req);
+}
+function updCel(r){
+  const c=r.cfg,own=!!S.cel[c.id];
+  r.costEl.textContent=own?'✓':c.cost+' pts';
+  if(own){r.el.classList.add('done');r.el.classList.remove('lock');r.el.disabled=true;r.reqEl.textContent=c.id==='x0'?'+1% de BPS por ponto guardado':'permanente em todos os renascimentos';return;}
+  r.el.classList.remove('done');
+  if(c.id!=='x0'&&!S.cel.x0){r.el.classList.add('lock');r.el.disabled=true;r.reqEl.textContent='requer Alma de Confeiteiro';return;}
+  r.el.classList.remove('lock');r.reqEl.textContent='';r.el.disabled=S.pts<c.cost;
+}
+function checkAch(){
+  let n=0;
+  for(let i=0;i<ACH.length;i++){const a=ACH[i];
+    if(!S.ach[a.id]){try{if(a.c()){S.ach[a.id]=1;toast('Conquista: '+a.n);chord();}}catch(e){}}
+    if(S.ach[a.id])n++;
+  }
+  return n;
+}
+function uiFast(){
+  $('cnt').textContent=fmt(S.br);
+  $('bpsTxt').textContent=fmt(bps());
+  $('cpcTxt').textContent=fmt(cpc());
+  if(S.buff&&S.buff.until>Date.now()){
+    $('buffChip').style.display='inline-block';
+    $('buffChip').textContent='FRENESI ×'+frenMult()+' · '+Math.ceil((S.buff.until-Date.now())/1000)+'s';
+  }else{if(S.buff)S.buff=null;$('buffChip').style.display='none';}
+  if(!gEl&&!document.hidden&&Date.now()>gNext&&S.clicks>3)spawnGold();
+}
+function uiSlow(){
+  for(let i=0;i<5;i++)updBld(bldRefs[i],i);
+  upRefs.forEach(updChip);
+  goldRefs.forEach(updGold);
+  celRefs.forEach(updCel);
+  achRefs.forEach(r=>r.el.classList.toggle('got',!!S.ach[r.cfg.id]));
+  const n=checkAch();
+  $('achCount').textContent=n;$('achFill').style.width=(n/50*100)+'%';
+  GUPS.forEach(g=>{if(!S.gup[g.id]&&S.goldens>=g.req){S.gup[g.id]=1;toast('Bônus dourado nível '+g.req+': '+g.name);chord();save();}});
+  WPS.forEach((w,i)=>{if(i>0&&S.grand>=w.req&&!S.flags['wp'+i]){S.flags['wp'+i]=1;toast('Papel de parede desbloqueado: Cozinha '+w.n+'!');chord();save();}});
+  applyWP();
+  $('tBps').textContent=fmt(bps());$('tCpc').textContent=fmt(cpc());
+  $('tTotal').textContent=fmt(S.grand);$('tClicks').textContent=S.clicks.toLocaleString('pt-BR');
+  $('tGold').textContent=S.goldens;$('tTime').textContent=ftime(S.play);
+  let aff=0;upRefs.forEach(r=>{const c=r.cfg;const bought=c.kind==='b'?S.up[c.id]:S.cup[c.id];const un=c.kind==='b'?S.b[c.b]>=c.thr:S.clicks>=c.req;if(!bought&&un&&S.br>=c.cost)aff++;});
+  $('upBadge').style.display=aff?'inline-block':'none';$('upBadge').textContent=aff;
+  const tc=toClaim();
+  $('legBadge').style.display=tc?'inline-block':'none';$('legBadge').textContent=tc;
+  $('legPts').textContent=S.pts;$('legRen').textContent=S.renasc;
+  $('legGrand').textContent=fmt(S.grand);$('legGain').textContent=tc;
+  $('renBtn').disabled=tc<1;
+}
+
+/* ═══════════ LOOP ═══════════ */
+let last=Date.now();
+setInterval(function(){
+  const now=Date.now(),dt=(now-last)/1000;last=now;
+  const r=bps();S.br+=r*dt;S.total+=r*dt;S.grand+=r*dt;S.play+=dt;
+  uiFast();
+},100);
+setInterval(uiSlow,400);
+setInterval(save,15000);
+window.addEventListener('beforeunload',save);
+
+/* ═══════════ INICIALIZAÇÃO ═══════════ */
+applyWP();
+$('sndBtn').textContent='som: '+(S.snd?'ligado':'mudo');
+if(S.clicks>5)$('hint').style.display='none';
+uiSlow();
+const away=(Date.now()-S.savedAt)/1000;
+if(away>120&&bps()>0){
+  const g=bps()*Math.min(away,7200);
+  S.br+=g;S.total+=g;S.grand+=g;
+  setTimeout(()=>toast('Bem-vindo de volta! Sua confeitaria assou +'+fmt(g)+' enquanto você estava fora'),800);
+}else if(S.grand===0){
+  setTimeout(()=>toast('Bem-vindo à confeitaria! Clique no brigadeiro para começar'),600);
+}
+</script>
+</body>
+</html>
